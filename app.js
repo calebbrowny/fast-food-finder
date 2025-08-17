@@ -318,17 +318,21 @@
         ctx.font = 'bold 12px Inter, sans-serif';
         ctx.textBaseline = 'middle';
         ctx.textAlign = 'left';
-        // Derive a label and compute spacing so the text spans most of the radius
+        // Derive a label and compute spacing so the text spans most of the radius.
+        // We reserve space near the centre (startOffset) to prevent labels from
+        // encroaching on the hub and extend the text towards the rim (maxLength).
         const rawLabel = this.items[i].name;
         const truncated = rawLabel.length > 20 ? rawLabel.substring(0, 17) + '…' : rawLabel;
         const label = truncated;
-        const maxLength = radius * 0.8; // let the last character stop before edge
-        const spacing = label.length > 1 ? maxLength / (label.length - 1) : 0;
+        const startOffset = radius * 0.2;      // leave 20% of the radius empty near the centre
+        const maxLength = radius * 0.8;        // stop at 80% of the radius to avoid clipping
+        const spacing = label.length > 1 ? (maxLength - startOffset) / (label.length - 1) : 0;
         for (let c = 0; c < label.length; c++) {
           const ch = label[c];
-          // Move outwards for each character
+          // Move outwards for each character. We add startOffset so the first
+          // character does not begin right at the centre.
           ctx.save();
-          ctx.translate(spacing * c, 0);
+          ctx.translate(startOffset + spacing * c, 0);
           ctx.fillText(ch, 0, 0);
           ctx.restore();
         }
