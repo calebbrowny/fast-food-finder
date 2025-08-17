@@ -214,15 +214,30 @@ button:active {
   margin: 0.2rem 0 0.5rem;
 }
 
+/* Wrap actions in a flex container so buttons sit side‑by‑side */
+#winner .winner-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
 #winner a {
   display: inline-block;
-  margin-top: 0.5rem;
   text-decoration: none;
   color: #fff;
-  background: linear-gradient(135deg, #36d1dc, #5b86e5);
   padding: 0.5rem 1.2rem;
   border-radius: 9999px;
   font-weight: 600;
+}
+
+/* Specific gradients for the different actions */
+#directions-link {
+  background: linear-gradient(135deg, #36d1dc, #5b86e5);
+}
+
+#order-link {
+  background: linear-gradient(135deg, #e52e71, #ff8a00);
 }
 
 /* Footer styling */

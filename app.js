@@ -25,12 +25,13 @@
     pizza: 'fa-pizza-slice',
     burger: 'fa-hamburger',
     chicken: 'fa-drumstick-bite',
-    sandwich: 'fa-bread-slice',
+    sandwich: 'fa-hamburger', // treat sandwiches like burgers for category
+    thai: 'fa-pepper-hot',
+    indian: 'fa-pepper-hot',
+    chinese: 'fa-pepper-hot',
     coffee: 'fa-mug-hot',
     noodle: 'fa-bowl-rice',
     sushi: 'fa-fish',
-    indian: 'fa-pepper-hot',
-    chinese: 'fa-pepper-hot',
     asian: 'fa-utensils',
     kebab: 'fa-hotdog',
     bakery: 'fa-cookie-bite',
@@ -132,14 +133,24 @@
     if (tags.cuisine) {
       const cuisines = tags.cuisine.split(';');
       for (const c of cuisines) {
-        const key = c.trim().toLowerCase();
+        let key = c.trim().toLowerCase();
+        // Normalise certain cuisines
+        if (key === 'sandwich') key = 'burger';
         if (ICON_MAP[key]) return key;
       }
     }
     // Fallback to keywords in name
     const name = tags.name ? tags.name.toLowerCase() : '';
-    for (const key of Object.keys(ICON_MAP)) {
-      if (key !== 'default' && name.includes(key)) return key;
+    for (let key of Object.keys(ICON_MAP)) {
+      if (key === 'default') continue;
+      // normalise
+      const synonyms = {
+        sandwich: 'burger',
+        kebab: 'burger'
+      };
+      let searchKey = key;
+      if (synonyms[key]) searchKey = synonyms[key];
+      if (name.includes(searchKey)) return searchKey;
     }
     return 'default';
   }
@@ -152,54 +163,79 @@
   function renderCategories(places) {
     const container = document.getElementById('choices-container');
     container.innerHTML = '';
-    // Count occurrences of cuisine keys
+    // Predefined categories that we always show. Keys must correspond to
+    // cuisine keys returned from getCuisineKey(). Labels are what appear in the UI.
+    const FIXED_CATEGORIES = [
+      { key: 'burger', label: 'Burger' },
+      { key: 'pizza', label: 'Pizza' },
+      { key: 'chicken', label: 'Fried Chicken' },
+      { key: 'chinese', label: 'Chinese' },
+      { key: 'thai', label: 'Thai' },
+      { key: 'indian', label: 'Indian' }
+    ];
+    // Count occurrences for each fixed category
     const counts = {};
     places.forEach(p => {
       const key = getCuisineKey(p.tags);
       counts[key] = (counts[key] || 0) + 1;
     });
-    // Sort keys by frequency descending and pick the top 6
-    const sortedKeys = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
-    const topKeys = sortedKeys.slice(0, 6);
-    // Track currently selected category
-    let activeKey = null;
-    function updateActive(newKey) {
-      activeKey = newKey;
-      // Update card classes
+    // Selected keys array; empty means all
+    let selectedKeys = [];
+    // Helper to refresh active classes and wheel
+    function updateWheel() {
+      // update card classes
       document.querySelectorAll('.choice').forEach(card => {
-        if (card.dataset.key === activeKey) card.classList.add('active');
-        else card.classList.remove('active');
+        const k = card.dataset.key;
+        if (k === 'all') {
+          if (selectedKeys.length === 0) card.classList.add('active');
+          else card.classList.remove('active');
+        } else {
+          if (selectedKeys.includes(k)) card.classList.add('active');
+          else card.classList.remove('active');
+        }
       });
-      // Filter places for the wheel and reinitialise
-      const filtered = activeKey && activeKey !== 'all'
-        ? places.filter(p => getCuisineKey(p.tags) === activeKey)
-        : places;
+      // Filter items based on selected keys
+      let filtered;
+      if (selectedKeys.length === 0) {
+        filtered = places;
+      } else {
+        filtered = places.filter(p => selectedKeys.includes(getCuisineKey(p.tags)));
+      }
       initWheelSection(filtered);
     }
-    // Always include an “All” option at the beginning
+    // “All” card
     const allCard = document.createElement('div');
     allCard.className = 'choice active';
     allCard.dataset.key = 'all';
     allCard.innerHTML = `<i class="fa-solid fa-compass"></i><span>All (${places.length})</span>`;
-    allCard.addEventListener('click', () => updateActive('all'));
+    allCard.addEventListener('click', () => {
+      // Clear selections
+      selectedKeys = [];
+      updateWheel();
+    });
     container.appendChild(allCard);
-    // Create cards for each top category
-    topKeys.forEach(key => {
+    // Cards for each fixed category
+    FIXED_CATEGORIES.forEach(cat => {
+      // Skip categories with no items
+      const count = counts[cat.key] || 0;
+      if (count === 0) return;
       const card = document.createElement('div');
       card.className = 'choice';
-      card.dataset.key = key;
-      const iconClass = ICON_MAP[key] || ICON_MAP.default;
-      const label = key === 'default' ? 'Other' : key.charAt(0).toUpperCase() + key.slice(1);
-      card.innerHTML = `<i class="fa-solid ${iconClass}"></i><span>${label} (${counts[key]})</span>`;
-      card.addEventListener('click', () => updateActive(key));
+      card.dataset.key = cat.key;
+      const iconClass = ICON_MAP[cat.key] || ICON_MAP.default;
+      card.innerHTML = `<i class="fa-solid ${iconClass}"></i><span>${cat.label} (${count})</span>`;
+      card.addEventListener('click', () => {
+        // Toggle selection
+        const index = selectedKeys.indexOf(cat.key);
+        if (index >= 0) selectedKeys.splice(index, 1);
+        else selectedKeys.push(cat.key);
+        updateWheel();
+      });
       container.appendChild(card);
     });
-    // Initially select “All”
-    activeKey = 'all';
-    // Show the choices section
+    // Show the choices section and initialise wheel
     document.getElementById('choices-section').classList.remove('hidden');
-    // Initialise wheel with all places
-    initWheelSection(places);
+    updateWheel();
   }
 
   /**
@@ -269,16 +305,21 @@
         ctx.fill();
         // Draw text. Choose white or dark text based on segment brightness.
         ctx.save();
+        // Rotate to the middle of the segment
         ctx.rotate(startAngle + arcAngle / 2);
-        ctx.translate(radius - 10, 0);
+        // Move text towards the outer ring but keep it inside to avoid cropping
+        ctx.translate(radius * 0.55, 0);
+        // Rotate text to be readable (upright)
         ctx.rotate(Math.PI / 2);
         // Determine contrast: compute luminance of the segment colour.
         const rgb = fillColour.replace('#','').match(/.{1,2}/g).map(c => parseInt(c, 16));
         const luminance = (0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]) / 255;
         ctx.fillStyle = luminance < 0.6 ? '#ffffff' : '#333333';
-        ctx.font = 'bold 14px Inter, sans-serif';
-        ctx.textAlign = 'right';
-        ctx.fillText(this.items[i].name.substring(0, 18), 0, 0);
+        ctx.font = 'bold 12px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        // Truncate names longer than 20 characters
+        const label = this.items[i].name.length > 20 ? this.items[i].name.substring(0, 17) + '…' : this.items[i].name;
+        ctx.fillText(label, 0, 0);
         ctx.restore();
       }
       ctx.restore();
@@ -399,7 +440,12 @@
         // Show winner information
         const winnerDiv = document.getElementById('winner');
         document.getElementById('winner-name').textContent = winner.name;
-        document.getElementById('map-link').href = `https://www.google.com/maps/search/?api=1&query=${winner.lat},${winner.lon}`;
+        // Directions link to Google Maps using directions mode
+        const dirLink = document.getElementById('directions-link');
+        dirLink.href = `https://www.google.com/maps/dir/?api=1&destination=${winner.lat},${winner.lon}`;
+        // Order link will perform a web search for the restaurant name with "order online"
+        const orderLink = document.getElementById('order-link');
+        orderLink.href = `https://www.google.com/search?q=${encodeURIComponent(winner.name + ' order online')}`;
         winnerDiv.classList.remove('hidden');
       });
     });
