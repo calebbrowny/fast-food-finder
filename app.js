@@ -13,7 +13,11 @@
   // Approximate driving distance radius in metres (5–10 minute drive).
   const SEARCH_RADIUS = 8000;
   // Maximum number of restaurants to display on the wheel.
-  const MAX_WHEEL_ITEMS = 10;
+  // Allow many places on the wheel. Using a high limit ensures that when
+  // selecting "All" you see all nearby options instead of being limited
+  // to only a handful. The number of segments can become large, but this
+  // fulfils the user’s request.
+  const MAX_WHEEL_ITEMS = 100;
   // Colour palette for wheel segments. We recycle colours if there are
   // more segments than colours.
   const COLOR_PALETTE = [
@@ -305,21 +309,29 @@
         ctx.fill();
         // Draw text. Choose white or dark text based on segment brightness.
         ctx.save();
-        // Rotate to the middle of the segment
+        // Rotate to the middle of the segment so the x‑axis points along the radius
         ctx.rotate(startAngle + arcAngle / 2);
-        // Move text towards the outer ring but keep it inside to avoid cropping
-        ctx.translate(radius * 0.55, 0);
-        // Rotate text to be readable (upright)
-        ctx.rotate(Math.PI / 2);
-        // Determine contrast: compute luminance of the segment colour.
+        // Choose text colour based on segment luminance for contrast
         const rgb = fillColour.replace('#','').match(/.{1,2}/g).map(c => parseInt(c, 16));
         const luminance = (0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]) / 255;
         ctx.fillStyle = luminance < 0.6 ? '#ffffff' : '#333333';
         ctx.font = 'bold 12px Inter, sans-serif';
-        ctx.textAlign = 'center';
-        // Truncate names longer than 20 characters
-        const label = this.items[i].name.length > 20 ? this.items[i].name.substring(0, 17) + '…' : this.items[i].name;
-        ctx.fillText(label, 0, 0);
+        ctx.textBaseline = 'middle';
+        ctx.textAlign = 'left';
+        // Derive a label and compute spacing so the text spans most of the radius
+        const rawLabel = this.items[i].name;
+        const truncated = rawLabel.length > 20 ? rawLabel.substring(0, 17) + '…' : rawLabel;
+        const label = truncated;
+        const maxLength = radius * 0.8; // let the last character stop before edge
+        const spacing = label.length > 1 ? maxLength / (label.length - 1) : 0;
+        for (let c = 0; c < label.length; c++) {
+          const ch = label[c];
+          // Move outwards for each character
+          ctx.save();
+          ctx.translate(spacing * c, 0);
+          ctx.fillText(ch, 0, 0);
+          ctx.restore();
+        }
         ctx.restore();
       }
       ctx.restore();
