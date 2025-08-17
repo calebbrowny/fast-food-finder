@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fast Food Finder</title>
+  <!-- Import Google Fonts for a modern look -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <!-- Font Awesome for category icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <!-- Our custom styles -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- The main app container houses all of our UI components. It is deliberately
+       narrow to ensure the app looks good on mobile devices. -->
+  <div id="app">
+    <header>
+      <h1>What’s for dinner?</h1>
+      <p>Let us help you decide! We’ll find takeaway spots nearby and let fate pick tonight’s meal.</p>
+    </header>
+    <section id="location-section">
+      <button id="use-location-btn"><i class="fas fa-location-arrow"></i> Use my location</button>
+      <div id="manual-entry">
+        <input type="text" id="location-input" placeholder="Or enter your suburb or address…" />
+        <button id="search-btn"><i class="fas fa-search"></i> Search</button>
+      </div>
+      <p id="location-status" class="status"></p>
+    </section>
+    <section id="choices-section" class="hidden">
+      <h2>Popular choices nearby</h2>
+      <div id="choices-container"></div>
+    </section>
+    <section id="wheel-section" class="hidden">
+      <div class="wheel-container">
+        <canvas id="wheel" width="300" height="300"></canvas>
+        <div id="pointer"></div>
+      </div>
+      <button id="spin-btn">Spin the wheel</button>
+      <div id="winner" class="hidden">
+        <h3>Tonight’s dinner:</h3>
+        <p id="winner-name"></p>
+        <a id="map-link" target="_blank">Open in Maps</a>
+      </div>
+    </section>
+    <footer>
+      <p>&copy; 2025&nbsp;Fast&nbsp;Food&nbsp;Finder</p>
+    </footer>
+  </div>
+  <!-- Our app logic lives in app.js -->
+  <script src="app.js"></script>
+</body>
+</html>

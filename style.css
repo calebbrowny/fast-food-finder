@@ -1,0 +1,239 @@
+/*
+ * Fast Food Finder – styling
+ *
+ * This stylesheet aims to evoke a playful, friendly vibe inspired by modern
+ * mobile applications. We lean into soft gradients, rounded corners,
+ * subtle shadows and vibrant accent colours. The layout is responsive and
+ * mobile‑first, scaling gracefully up to desktop widths. Feel free to tweak
+ * the colour palette and spacing to suit your own taste.
+ */
+
+/* Global resets and base typography */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, #a5d8ff 0%, #fef6ff 100%);
+  color: #333;
+}
+
+/* Container that holds the entire app. We keep it narrow and centred to
+   create an app‑like feel on desktop and mobile devices. */
+#app {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem 1rem 4rem;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+header h1 {
+  margin: 0.5rem 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2d2d2d;
+}
+
+header p {
+  margin: 0;
+  font-size: 1rem;
+  color: #555;
+}
+
+/* Location section styling */
+#location-section {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+/* Buttons share a common style. We use a gradient accent colour inspired by
+   the provided style inspo image and apply subtle hover effects. */
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #ff8a00, #e52e71);
+  color: #fff;
+  border: none;
+  border-radius: 9999px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* Search input styling */
+#manual-entry {
+  margin-top: 1rem;
+}
+
+#location-input {
+  width: 70%;
+  padding: 0.7rem 1rem;
+  border: 2px solid #ddd;
+  border-radius: 50px;
+  font-size: 1rem;
+  outline: none;
+  background-color: #fff;
+  transition: border-color 0.2s ease;
+}
+
+#location-input:focus {
+  border-color: #e52e71;
+}
+
+/* Status text for location fetching and errors */
+.status {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #e52e71;
+}
+
+/* Popular choices grid */
+#choices-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* Each choice card uses a white background and soft shadow. When
+   selected or hovered the shadow becomes stronger and the card lifts up
+   slightly. */
+.choice {
+  width: 90px;
+  height: 100px;
+  background-color: #fff;
+  border-radius: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  text-align: center;
+  padding: 0.5rem;
+}
+
+.choice:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.choice.active {
+  border: 2px solid #e52e71;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.choice i {
+  font-size: 2rem;
+  margin-bottom: 0.3rem;
+  color: #e52e71;
+}
+
+.choice span {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Wheel section styling */
+#wheel-section {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.wheel-container {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  margin: 0 auto;
+}
+
+#wheel {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Pointer styling – an isosceles triangle pointing downward placed at the
+   top centre of the wheel container. */
+#pointer {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-bottom: 25px solid #e52e71;
+  z-index: 2;
+}
+
+/* Winner display */
+#winner {
+  margin-top: 1rem;
+}
+
+#winner h3 {
+  margin: 0.5rem 0;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+#winner p {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #e52e71;
+  margin: 0.2rem 0 0.5rem;
+}
+
+#winner a {
+  display: inline-block;
+  margin-top: 0.5rem;
+  text-decoration: none;
+  color: #fff;
+  background: linear-gradient(135deg, #36d1dc, #5b86e5);
+  padding: 0.5rem 1.2rem;
+  border-radius: 9999px;
+  font-weight: 600;
+}
+
+/* Footer styling */
+footer {
+  text-align: center;
+  margin-top: 3rem;
+  color: #777;
+  font-size: 0.8rem;
+}
+
+/* Hide elements with the hidden class */
+.hidden {
+  display: none !important;
+}
